@@ -1,10 +1,12 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Models\Payroll;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 Route::view('/', 'welcome');
 
-Route::view('dashboard', 'dashboard')
+Route::get('dashboard', \App\Livewire\Dashboard\Dashboard::class)
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
@@ -17,6 +19,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('employee', 'livewire.employee.index')->name('employee.index');
     Route::get('editkaryawan', \App\Livewire\Employee\EmployeeManager::class)->name('employee.edit');
     Route::get('/payroll', \App\Livewire\Calculator\PayrollCalculator::class)->name('payroll.calculator');
+    Route::get('/payroll-history', \App\Livewire\Payrol\PayrolHistory::class)->name('payroll.history');
+    Route::get('/cetak-slip/{id}', function ($id) {
+    $payroll = Payroll::with('employee')->findOrFail($id);
+    $pdf = Pdf::loadView('pdf.slip-gaji', ['data' => $payroll]);
+    return $pdf->stream('Slip_Gaji_' . $payroll->employee->nik . '.pdf');
+})->name('payroll.cetak');
 });
 
 

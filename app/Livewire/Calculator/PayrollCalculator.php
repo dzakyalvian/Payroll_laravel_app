@@ -8,17 +8,17 @@ use App\Models\Employee;
 use Illuminate\Validation\Rule;
 
 class PayrollCalculator extends Component
-{   
+{
     // Properti untuk menyimpan input dari form
     public ?int $employee_id = null;
-    public int $basic_salary = 0;
-    public int $allowance = 0;
-    public int $deduction = 0;
+    public ?int $basic_salary = 0;
+    public ?int $allowance = 0;
+    public ?int $deduction = 0;
     public string $month_year = ''; // user pilih sendiri: "April 2026"
 
 
     // Output (dihitung otomatis)
-    public int $net_salary = 0;
+    public ?int $net_salary = 0;
 
     public function mount ()
     {
@@ -31,7 +31,7 @@ class PayrollCalculator extends Component
     public function updated($field)
     {
         if (in_array($field,['basic_salary','allowance','deduction'])) {
-            $this->net_salary = max(0, ($this->basic_salary + $this->allowance) - $this->deduction);
+            $this->net_salary = max(0, (($this->basic_salary ?? 0) + ($this->allowance ?? 0)) - ($this->deduction ?? 0));
         }
     }
 
@@ -66,7 +66,7 @@ class PayrollCalculator extends Component
             'month_year' => $this->month_year,
         ]);
 
-        session()->flash('success', 'Slip gaji berhasil diterbitkan untuk ', $this->month_year . '!');
+        session()->flash('success', 'Slip gaji berhasil diterbitkan untuk ' . $this->month_year . '!');
         // Reset form setelah simpan
         $this->reset(['employee_id', 'basic_salary', 'allowance', 'deduction', 'net_salary']);
         //Reset periode ke bulan sekarang — jangan panggil mount() secara manual!
@@ -74,7 +74,7 @@ class PayrollCalculator extends Component
 
 
     }
-    
+
 
     public function render()
     {
